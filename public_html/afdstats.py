@@ -16,7 +16,8 @@ import htmllib
 
 MAXLIMIT = 500
 
-#TODO: Provide link to usersearch.py that will show all AfD edits during the time period that this search covers
+#TODO: Provide link
+to usersearch.py that will show all AfD edits during the time period that this search covers
 
 
 matchstats = [0,0,0]	#matches, non-matches, no consensus
@@ -100,9 +101,9 @@ def main():
 			startdatestr = ""
 		
 		if nomsonly:
-			cursor.execute(u'SELECT page_title FROM revision_userindex JOIN page ON rev_page=page_id WHERE rev_user_text=%s AND page_namespace=4 AND page_title LIKE "Articles_for_deletion%%" AND NOT page_title LIKE "Articles_for_deletion/Log/%%" AND rev_parent_id=0' + startdatestr + ' ORDER BY rev_timestamp DESC;', (username))
+			cursor.execute(u'SELECT page_title FROM revision_userindex JOIN page ON rev_page=page_id JOIN actor ON actor_id=rev_actor WHERE actor_name=%s AND page_namespace=4 AND page_title LIKE "Articles_for_deletion%%" AND NOT page_title LIKE "Articles_for_deletion/Log/%%" AND rev_parent_id=0' + startdatestr + ' ORDER BY rev_timestamp DESC;', (username))
 		else:
-			cursor.execute(u'SELECT DISTINCT page_title FROM revision_userindex JOIN page ON rev_page=page_id WHERE rev_user_text=%s AND page_namespace=4 AND page_title LIKE "Articles_for_deletion%%" AND NOT page_title LIKE "Articles_for_deletion/Log/%%"' + startdatestr + ' ORDER BY rev_timestamp DESC;', (username))
+			cursor.execute(u'SELECT DISTINCT page_title FROM revision_userindex JOIN page ON rev_page=page_id JOIN actor ON actor_id=rev_actor WHERE actor_name=%s AND page_namespace=4 AND page_title LIKE "Articles_for_deletion%%" AND NOT page_title LIKE "Articles_for_deletion/Log/%%"' + startdatestr + ' ORDER BY rev_timestamp DESC;', (username))
 		results = cursor.fetchall()
 
 		print "<a href='http://tools.wmflabs.org/afdstats/'><small>&larr;New search</small></a>"
@@ -571,7 +572,7 @@ def APIfirsteditor(p):	#Finds the name of the user who created a particular page
 
 def DBfirsteditor(p, cursor):   #Finds the name of the user who created a particular page, using a database query.  Replaces APIfirsteditor()
         try:
-                cursor.execute("SELECT rev_user_text, rev_timestamp FROM revision JOIN page ON rev_page=page_id WHERE rev_parent_id=0 AND page_title=%s AND page_namespace=4;", (p.replace(" ", "_")))
+                cursor.execute("SELECT actor_name, rev_timestamp FROM revision JOIN page ON rev_page=page_id JOIN actor ON actor_id=rev_actor WHERE rev_parent_id=0 AND page_title=%s AND page_namespace=4;", (p.replace(" ", "_")))
                 results = cursor.fetchall()[0]
                 return (results[0], datetime.datetime.strptime(results[1], "%Y%m%d%H%M%S").strftime("%B %d, %Y"))
         except:
